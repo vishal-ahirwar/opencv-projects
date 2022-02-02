@@ -2,6 +2,7 @@
 #include <iostream>
 #include<vector>
 #include <opencv2/opencv.hpp>
+#include<ctime>
 // #define IMAGEFILES
 // #define VIDEOFILES
 // #define READVIDEOFILE
@@ -60,7 +61,7 @@ int main()
         cv::namedWindow(path, cv::WINDOW_GUI_EXPANDED);
         cv::imshow(path, imgErode);
     **/
-    cv::Mat img, imgBlur, imgCanny;
+    cv::Mat img, imgBlur, imgCanny,imgHSV,mask;
     // cv::VideoCapture cap(0);
     /**
         cv::resize(cv::imread(path),img,cv::Size(),0.7,0.5);
@@ -69,27 +70,23 @@ int main()
         cv::putText(img,"Hello, World to opencv C++ by Vishal.",cv::Point(100,130),cv::FONT_HERSHEY_TRIPLEX,1,cv::Scalar(255,255,255),1);
         cv::imshow(path,img);
     **/
-    /**
          int hmin{}, smin{}, vmin{};
          int hmax{}, smax{}, vmax{};
 
-         cv::namedWindow("Trackbars", (800, 200));
-         cv::cvtColor(img, imgHSV, cv::COLOR_RGB2HSV);
-         cv::createTrackbar("hue MIN", "Trackbars", &hmin, 255);
-         cv::createTrackbar("sat MIN", "Trackbars", &smin, 255);
-         cv::createTrackbar("val MIN", "Trackbars", &vmin, 255);
-         cv::createTrackbar("hue MAX", "Trackbars", &hmax, 255);
-         cv::createTrackbar("sat MAX", "Trackbars", &smax, 255);
-         cv::createTrackbar("val MAX", "Trackbars", &vmax, 255);
+         cv::namedWindow("Detection Color", (800, 200));
+        //  cv::cvtColor(img, imgHSV, cv::COLOR_RGB2HSV);
+         cv::createTrackbar("hue MIN", "Detection Color", &hmin, 255);
+         cv::createTrackbar("sat MIN", "Detection Color", &smin, 255);
+         cv::createTrackbar("val MIN", "Detection Color", &vmin, 255);
+         cv::createTrackbar("hue MAX", "Detection Color", &hmax, 255);
+         cv::createTrackbar("sat MAX", "Detection Color", &smax, 255);
+         cv::createTrackbar("val MAX", "Detection Color", &vmax, 255);
+    /**
 
          while (true)
          {
              // cap.read(img);
 
-             cv::Scalar lower(hmin, smin, vmin);
-             cv::Scalar upper(hmax, smax, vmax);
-             // printf("trackbars value : %d %d\n", hmin, hmax);
-             cv::inRange(img, lower, upper, mask);
              cv::namedWindow(path, cv::WINDOW_GUI_EXPANDED);
              cv::putText(imgHSV,"FRAMES HAS BEEN RUN :",cv::Point(hmin,hmax),cv::FONT_HERSHEY_DUPLEX,1,cv::Scalar(255,255,255));
              cv::imshow(path, imgHSV);
@@ -100,22 +97,29 @@ int main()
     cv::Mat src, imgDi,imgContours;
     cv::VideoCapture cap(0);
     cv::Mat Kernal{cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3))};
+    // double FPS{};
     while (true)
     {
+     //   time(now);
+
         cap.read(src);
 
+        // printf("trackbars value : %d %d\n", hmin, hmax);
         cv::cvtColor(src, img, cv::COLOR_BGR2GRAY);
-        cv::GaussianBlur(img, imgBlur, cv::Size(3, 3), 3, 0);
+        cv::GaussianBlur(img, imgBlur, cv::Size(13, 13), 3, 0);
         cv::Canny(imgBlur, imgCanny, 25, 75);
         cv::dilate(imgCanny, imgDi, Kernal);
 
         GetContours(imgDi,imgContours);
+        cv::Scalar lower(hmin, smin, vmin);
+        cv::Scalar upper(hmax, smax, vmax);
+        cv::inRange(img, lower, upper, mask);
 
-        cv::imshow(path, imgDi);
+        cv::imshow("Camera 01 running ...", mask);
+
         if (cv::waitKey(1) == 27)
             break;
     }
-
 #endif
     return 0;
 };
